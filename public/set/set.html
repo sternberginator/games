@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Set</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <style type="text/css"></style>
+</head>
+<body>
+    <svg id="cards"></svg>
+
+    <script src="./cardSetup.js"></script>
+    <script>
+        const margins = { top:10, bottom:50, left:50, right:10 };
+        const cardWidth = 150;
+        const cardHeight = 250;
+        const padding = 25;
+        const rows = 3;
+        const cols = 4;
+
+        // TODO: make inside of unfilled shapes turn gray with the rest of the card
+        // TODO: show sets found on the side somewhere?
+        // TODO: instead of just keeping track of found sets, replace cards when a set is found
+        //       (but we'll need to keep track of which cards have already been selected)
+        //       (and then handle getting to the end of the deck)
+        // TODO: button to redeal if no valid sets are present - or even better, on each new deal
+        //       check if any sets are present and automatically show a message and redeal
+
+        const cardArea = d3.select("#cards")
+            .attr("width", cols*(cardWidth+padding) + margins.right + margins.left)
+            .attr("height", rows*(cardHeight+padding) + margins.top + margins.bottom)
+            .append("g")
+            .attr("transform", `translate(${margins.left}, ${margins.top})`);
+
+        let currentCards = pickCards(rows*cols).map(obj => Object.assign(obj, {selected: false}));
+        let selected = [];
+        let found = [];
+
+        const getCardBackgroundId = (i) => `cardBackground_${i}`;
+
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const cardIndex = i*cols + j;
+                const card = currentCards[cardIndex];
+                let chart = cardArea.append("g")
+                    .attr("transform", `translate(${j*(cardWidth + padding)},${i*(cardHeight + padding)})`);
+                chart.append("rect")
+                    .attr("width", cardWidth)
+                    .attr("height", cardHeight)
+                    .attr("id", getCardBackgroundId(cardIndex))
+                    .style("fill", () => card.selected ? "lightgrey" : "white")
+                    .style("stroke", "black")
+                    .classed("cardBackground");
+
+                const shapes = chart.selectAll(".cardShape").data(card.num).enter();
+                if (card.shape === "oval") {
+                    shapes.append("ellipse")
+                        .attr("rx", cardWidth / 5)
+                        .attr("ry", cardHeight / 15)
+                        .attr("cx", cardWidth / 2)
+                        .attr("cy", num => num * cardHeight / 10)
+                        .classed("cardShape", true);
+                } else if (card.shape == "diamond") {
+                    const diamondGenerator = d3.symbol().type(d3.symbolDiamond).size(600);
+                    shapes.append("path")
+                        .attr("d", diamondGenerator)
+                        .attr("transform", num => `translate(${cardWidth/2}, ${num * cardHeight/10})`)
+                        .classed("cardShape", true);
+                } else {
+                    const starGenerator = d3.symbol().type(d3.symbolStar).size(400);
+                    shapes.append("path")
+                        .attr("d", starGenerator)
+                        .attr("transform", num => `translate(${cardWidth/2}, ${num * cardHeight/10})`)
+                        .classed("cardShape", true);
+                }
+                if (card.fill === "shaded") {
+                    chart.append("defs")
+                        .append("pattern")
+                        .attr('id', `diagonal${cardIndex}`)
+                        .attr('patternUnits', 'userSpaceOnUse')
+                        .attr('width', 4)
+                        .attr('height', 4)
+                        .append('path')
+                        .attr('d', 'M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2')
+                        .attr('stroke', card.color)
+                        .attr('stroke-width', 1);
+                }
+                chart.selectAll(".cardShape")
+                    .attr("stroke", card.color)
+                    .attr("stroke-width", 2)
+                    .style("fill", () => {
+                        if (card.fill === "solid") return card.color;
+                        if (card.fill === "none") return "white";
+                        return `url(#diagonal${cardIndex})`;
+                    });
+                chart.append("rect")
+                    .attr("width", cardWidth)
+                    .attr("height", cardHeight)
+                    .style("opacity", 0)
+                    .on("click", () => {
+                        currentCards[cardIndex].selected = !card.selected;
+                        if (currentCards[cardIndex].selected) selected.push(cardIndex);
+                        else selected.splice(selected.indexOf(cardIndex), 1);
+
+                        chart.select(`#${getCardBackgroundId(cardIndex)}`)
+                            .style("fill", () => currentCards[cardIndex].selected ? "lightgrey" : "none");
+
+                        if (selected.length === 3) {
+                            selected.sort();
+                            let messsage;
+                            if (found.indexOf(selected.join('_')) >= 0) {
+                                message = "this set has already been found";
+                            } else {
+                                if (verifySet(...selected.map(i => currentCards[i]))) {
+                                    found.push(selected.join('_'));
+                                    message = "set found";
+                                } else {
+                                    message = "not a valid set";
+                                }
+                            }
+                            selected.forEach((i) => {
+                                cardArea.select(`#${getCardBackgroundId(i)}`).style("fill", "white");
+                            });
+                            selected = [];
+                            currentCards.forEach((c, i) => currentCards[i].selected = false);
+                            console.log(message);
+                        }
+                    });
+            }
+        }
+
+        // striped fill: https://stackoverflow.com/questions/17776641/fill-rect-with-pattern
+
+    </script>
+</body>
+</html>
