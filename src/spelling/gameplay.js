@@ -3,18 +3,18 @@ import {
     pangrams,
 } from './wordLists.json';
 
-const MILESTONES = {
-    Beginner: 0,
-    'Good Start': 2,
-    'Moving Up': 5,
-    Good: 8,
-    Solid: 15,
-    Nice: 25,
-    Great: 40,
-    Amazing: 50,
-    Genius: 70,
-    'Queen Bee': 100,
-};
+const MILESTONES = [
+    { name: 'Beginner', pct: 0 },
+    { name: 'Good Start', pct: 2 },
+    { name: 'Moving Up', pct: 5 },
+    { name: 'Good', pct: 8 },
+    { name: 'Solid', pct: 15 },
+    { name: 'Nice', pct: 25 },
+    { name: 'Great', pct: 40 },
+    { name: 'Amazing', pct: 50 },
+    { name: 'Genius', pct: 70 },
+    { name: 'Queen Bee', pct: 100 },
+];
 
 const generatePuzzle = () => {
     const pangram = pangrams[randInt(0, pangrams.length)];
@@ -27,13 +27,10 @@ const generatePuzzle = () => {
         return l.reduce((valid, current) => valid && lettersSet.has(current), true);
     });
     const totalPoints = validWords.reduce((p, w) => p + scoreWord(w), 0);
-    const milestones = Object.entries(MILESTONES).reduce((res, entry) => {
-        const [key, val] = entry;
-        return {
-            ...res,
-            [key]: Math.ceil(totalPoints * (val / 100)),
-        };
-    }, {});
+    const milestones = MILESTONES.map(({ name, pct }) => ({
+        name,
+        points: Math.ceil(totalPoints * (pct / 100)),
+    }));
     return {
         letters,
         centerLetter,

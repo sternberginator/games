@@ -3,7 +3,7 @@
 
 ## TODOs:
 
-### Set:
+### Pattern matching:
 
 make inside of unfilled shapes turn gray with the rest of the card
 show sets found on the side somewhere?
@@ -11,7 +11,7 @@ instead of just keeping track of found sets, replace cards when a set is found (
 button to redeal if no valid sets are present - or even better, on each new deal
 check if any sets are present and automatically show a message and redeal
 
-### Spelling bee:
+### Spelling game:
 
 - [x] look up scoring
     4 letter word = 1 point
@@ -22,7 +22,7 @@ check if any sets are present and automatically show a message and redeal
 - [x] generate list of possible words for given puzzle
 - [ ] (eliminate puzzle if wordlist is too short or something)
 - [x] compute scoring milestones
-    Beginner 0% of the grand Queen Bee total
+    Beginner 0% of the grand total
     Good Start 2%
     Moving Up 5%
     Good 8%
@@ -48,6 +48,5 @@ list of words found so far
 visual display of milestone progress
 (click to open) list of what the milestones are
 
-intentionally style differently than the real one?
-(eventually figure out heroku or w/e to host this+set so we can
-    play them easily - good reason to make styles different than the originals)
+intentionally style differently than the inspirations
+(eventually figure out heroku or w/e to host these so we can play them easily)

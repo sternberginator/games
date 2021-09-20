@@ -6,8 +6,8 @@ import {
     Link,
 } from 'react-router-dom';
 import {
-    SpellingBee,
-} from './spelling-bee';
+    SpellingGame,
+} from './spelling';
 const {
     PUBLIC_URL,
 } = process.env;
@@ -17,19 +17,19 @@ function App() {
         <Router>
             <div style={styles.container}>
                 <Switch>
-                    <Route path="/spelling-bee">
+                    <Route path="/spelling">
                         <Link to="/">Back to home</Link>
-                        <SpellingBee />
+                        <SpellingGame />
                     </Route>
                     <Route path="/">
                         <h1>Games</h1>
                         <nav>
                             <ul>
                                 <li>
-                                    <a href={`${PUBLIC_URL}/set/set.html`}>Set</a>
+                                    <a href={`${PUBLIC_URL}/pattern-cards/index.html`}>Pattern-matching cards</a>
                                 </li>
                                 <li>
-                                    <Link to="/spelling-bee">Spelling Bee</Link>
+                                    <Link to="/spelling">Spelling Game</Link>
                                 </li>
                             </ul>
                         </nav>
