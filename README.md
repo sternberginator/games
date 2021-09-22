@@ -3,12 +3,17 @@
 
 ## TODOs:
 
+### Deployment
+
+- Maybe try https://betterprogramming.pub/how-to-host-your-react-app-on-github-pages-for-free-919ad201a4cb
+- Or just use Heroku
+
 ### Pattern matching:
 
 - [ ] make inside of unfilled shapes turn gray with the rest of the card
 - [ ] show sets found on the side somewhere?
 - [ ] instead of just keeping track of found sets, replace cards when a set is found (but we'll need to keep track of which cards have already been selected) (and then handle getting to the end of the deck)
-- [ ]button to redeal if no valid sets are present - or even better, on each new deal check if any sets are present and automatically show a message and redeal
+- [ ] button to redeal if no valid sets are present - or even better, on each new deal check if any sets are present and automatically show a message and redeal
 
 ### Spelling game:
 
@@ -48,4 +53,3 @@ visual display of milestone progress
 (click to open) list of what the milestones are
 
 intentionally style differently than the inspirations
-(eventually figure out heroku or w/e to host these so we can play them easily)
