@@ -5,6 +5,7 @@ import React, {
 import {
     generatePuzzle,
     scoreWord,
+    hasInvalidLetters,
 } from './gameplay';
 
 const ALPHABET = new Set('abcdefghijklmnopqrstuvwxyz'.split(''));
@@ -15,15 +16,15 @@ puzzle: {
     centerLetter: '',
     validWords: [],
     milestones: [{ name, points }],
+    pangrams: [],
 }
 
 TODO:
 - styling/layout that is actually good
-- message w/ why word is invalid/already found/score/is pangram
 - ability to see all milestones & point values (click to open?)
 - visualization of progress w/ milestones
-- sort pangrams at top of found words list and make them bold/otherwise distinctive
 - color code letters in typed word by center vs valid vs invalid
+- some way to end game and see all the possible words (w/ ones you found indicated)
 */
 
 export const SpellingGame = () => {
@@ -33,6 +34,7 @@ export const SpellingGame = () => {
     const [score, setScore] = useState(0);
     const [currentRank, setCurrentRank] = useState('');
     const [guess, setGuess] = useState('');
+    const [message, setMessage] = useState('');
 
     const getNewPuzzle = () => {
         const puzzle = generatePuzzle();
@@ -46,7 +48,16 @@ export const SpellingGame = () => {
     useEffect(getNewPuzzle, []);
 
     const addFoundWord = (word) => {
-        setFoundWords(foundWords.slice().concat([word]).sort());
+        setFoundWords(foundWords.slice().concat([word]).sort((a, b) => {
+            if (puzzle.pangrams.includes(a)) {
+                if (puzzle.pangrams.includes(b)) {
+                    return a < b ? -1 : 1;
+                }
+                return -1;
+            }
+            if (puzzle.pangrams.includes(b)) return 1;
+            return a < b ? -1 : 1;
+        }));
     };
     const updateScore = (newScore) => {
         setScore(newScore);
@@ -66,12 +77,27 @@ export const SpellingGame = () => {
     };
 
     const enterGuess = () => {
+        let m = '';
+        if (guess === '') return;
         if (guessIsValid()) {
             const points = scoreWord(guess);
             updateScore(score + points);
+            m = `${puzzle.pangrams.includes(guess) ? 'Pangram! ' : ''}+${points}`;
             addFoundWord(guess);
+        } else {
+            if (guess.length < 4) m = 'Too short';
+            else if (foundWords.includes(guess)) m = 'Already found';
+            else if (!guess.includes(puzzle.centerLetter)) m = 'Missing center letter';
+            else if (hasInvalidLetters(guess, puzzle.letters)) m = 'Invalid letters';
+            else m = 'Not in word list';
         }
+        updateMessage(m);
         setGuess('');
+    };
+
+    const updateMessage = (m) => {
+        setMessage(m);
+        setTimeout(() => setMessage(''), 1500);
     };
 
     const keyboardEventListener = (e) => {
@@ -106,6 +132,7 @@ export const SpellingGame = () => {
             <button onClick={getNewPuzzle} style={styles.newGameButton}>
                 New game
             </button>
+            <p style={styles.message}><i>{message}</i></p>
             <div style={styles.guessContainer}>
                 <div style={styles.guess}>
                     <span>{guess}</span>
@@ -149,7 +176,15 @@ export const SpellingGame = () => {
                 <h4>Found words:</h4>
                 <ul>
                     {foundWords.map((word) => (
-                        <li key={word}>{word}</li>
+                        <li
+                            key={word}
+                            style={{
+                                ...styles.foundWord,
+                                ...(puzzle.pangrams.includes(word) ? styles.foundPangram : {}),
+                            }}
+                        >
+                            {word}
+                        </li>
                     ))}
                 </ul>
             </div>
@@ -211,5 +246,15 @@ const styles = {
     guessContainer: {
         display: 'flex',
         flexDirection: 'row',
+    },
+    message: {
+        height: 24,
+        fontSize: 18,
+    },
+    foundWord: {
+
+    },
+    foundPangram: {
+        fontWeight: 'bold',
     },
 };

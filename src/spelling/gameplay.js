@@ -31,11 +31,13 @@ const generatePuzzle = () => {
         name,
         points: Math.ceil(totalPoints * (pct / 100)),
     }));
+    const validPangrams = validWords.filter((w) => (new Set(w.split(''))).size === 7);
     return {
         letters,
         centerLetter,
         validWords,
         milestones,
+        pangrams: validPangrams,
     };
 };
 
@@ -45,6 +47,11 @@ const scoreWord = (word) => {
     return word.length;
 };
 
+const hasInvalidLetters = (word, letters) => {
+    const wordLetters = word.split('');
+    return !wordLetters.every((l) => letters.includes(l));
+};
+
 const getLetters = (word) => Array.from(new Set(word.split('')));
 
 const randInt = (min, max) => Math.floor(Math.random() * (max - min) + min);
@@ -52,4 +59,5 @@ const randInt = (min, max) => Math.floor(Math.random() * (max - min) + min);
 export {
     generatePuzzle,
     scoreWord,
+    hasInvalidLetters,
 };
