@@ -9,6 +9,8 @@ import {
 } from './gameplay';
 
 const ALPHABET = new Set('abcdefghijklmnopqrstuvwxyz'.split(''));
+const MAX_WORD_LENGTH = 20;
+const CENTER_LETTER_COLOR = 'green';
 
 /*
 puzzle: {
@@ -22,8 +24,7 @@ puzzle: {
 TODO:
 - styling/layout that is actually good
 - ability to see all milestones & point values (click to open?)
-- visualization of progress w/ milestones
-- color code letters in typed word by center vs valid vs invalid
+- visualization of progress w/ milestones (improve)
 - some way to end game and see all the possible words (w/ ones you found indicated)
 */
 
@@ -67,7 +68,21 @@ export const SpellingGame = () => {
         setCurrentRank(milestone.name);
     };
 
-    const clickLetter = (letter) => setGuess(`${guess}${letter}`);
+    const updateMessage = (m, effect = null) => {
+        setMessage(m);
+        setTimeout(() => setMessage(''), 1500);
+    };
+
+    const updateGuess = (newGuess) => {
+        if (newGuess.length > MAX_WORD_LENGTH) {
+            updateMessage('Too long');
+            setGuess('');
+            return;
+        }
+        setGuess(newGuess);
+    };
+
+    const clickLetter = (letter) => updateGuess(`${guess}${letter}`);
     const backspace = () => setGuess(guess.slice(0, guess.length - 1));
     const shuffleLetters = () => setOuterLetters(shuffleArray(outerLetters));
 
@@ -93,11 +108,6 @@ export const SpellingGame = () => {
         }
         updateMessage(m);
         setGuess('');
-    };
-
-    const updateMessage = (m) => {
-        setMessage(m);
-        setTimeout(() => setMessage(''), 1500);
     };
 
     const keyboardEventListener = (e) => {
@@ -127,7 +137,7 @@ export const SpellingGame = () => {
     const { centerLetter } = puzzle;
 
     return (
-        <div>
+        <div style={styles.container}>
             <h2>Spelling Game</h2>
             <button onClick={getNewPuzzle} style={styles.newGameButton}>
                 New game
@@ -135,17 +145,26 @@ export const SpellingGame = () => {
             <p style={styles.message}><i>{message}</i></p>
             <div style={styles.guessContainer}>
                 <div style={styles.guess}>
-                    <span>{guess}</span>
+                    {guess.split('').map((letter) => {
+                        let color = 'gray';
+                        if (letter === centerLetter) color = CENTER_LETTER_COLOR;
+                        if (outerLetters.includes(letter)) color = 'black';
+                        return (
+                            <span style={{ color }}>{letter}</span>
+                        );
+                    })}
                 </div>
-                <button style={styles.enterButton} onClick={enterGuess}>
-                    Enter
-                </button>
-                <button style={styles.enterButton} onClick={backspace}>
-                    Backspace
-                </button>
-                <button style={styles.enterButton} onClick={() => setGuess('')}>
-                    Clear
-                </button>
+                <div style={styles.guessButtonsContainer}>
+                    <button style={styles.guessButton} onClick={enterGuess}>
+                        Enter
+                    </button>
+                    <button style={styles.guessButton} onClick={backspace}>
+                        Backspace
+                    </button>
+                    <button style={styles.guessButton} onClick={() => setGuess('')}>
+                        Clear
+                    </button>
+                </div>
             </div>
             <div>
                 <div>
@@ -172,6 +191,13 @@ export const SpellingGame = () => {
             </button>
             <p>{`Score: ${score}`}</p>
             <p>{`Rank: ${currentRank}`}</p>
+            <div style={styles.milestoneMap}>
+                {puzzle.milestones.map(({ points }) => (
+                    <span style={points <= score ? styles.completedMilestone : styles.uncompletedMilestone}>
+                        {points}
+                    </span>
+                ))}
+            </div>
             <div>
                 <h4>Found words:</h4>
                 <ul>
@@ -210,42 +236,56 @@ const shuffleArray = (arr) => arr.map((value) => ({ value, sort: Math.random() }
     .map(({ value }) => value);
 
 const buttonPanelWidth = 210;
+const buttonHeight = 60;
+const guessHeight = 32;
 
 const styles = {
+    container: {
+
+    },
     letter: {
         color: 'black',
         fontSize: 28,
         width: buttonPanelWidth / 3,
+        height: buttonHeight,
         textAlign: 'center',
     },
     centerLetter: {
-        color: 'green',
+        color: CENTER_LETTER_COLOR,
         fontSize: 28,
         width: buttonPanelWidth,
+        height: buttonHeight,
         textAlign: 'center',
     },
     newGameButton: {
         marginBottom: 16,
-    },
-    enterButton: {
-        height: 24,
-        marginLeft: 10,
+        fontSize: 16,
     },
     shuffleButton: {
         height: 24,
         marginTop: 10,
+        fontSize: 16,
+    },
+    guessButton: {
+        marginLeft: 10,
+        height: guessHeight,
+        fontSize: 16,
     },
     guess: {
-        border: '1px solid green',
-        marginBottom: 10,
-        fontSize: 20,
+        border: `1px solid ${CENTER_LETTER_COLOR}`,
+        fontSize: 28,
         textAlign: 'center',
         width: 200,
-        minHeight: 24,
+        minHeight: guessHeight,
     },
     guessContainer: {
         display: 'flex',
         flexDirection: 'row',
+        marginBottom: 10,
+    },
+    guessButtonsContainer: {
+        display: 'flex',
+        alignItems: 'center',
     },
     message: {
         height: 24,
@@ -256,5 +296,17 @@ const styles = {
     },
     foundPangram: {
         fontWeight: 'bold',
+    },
+    milestoneMap: {
+
+    },
+    completedMilestone: {
+        color: CENTER_LETTER_COLOR,
+        fontWeight: 'bold',
+        paddingRight: 16,
+    },
+    uncompletedMilestone: {
+        color: 'gray',
+        paddingRight: 16,
     },
 };
