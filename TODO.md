@@ -10,7 +10,7 @@
 
 ### Pattern matching:
 
-- [ ] make inside of unfilled shapes turn gray with the rest of the card
+- [x] make inside of unfilled shapes turn gray with the rest of the card
 - [ ] show sets found on the side somewhere?
 - [ ] instead of just keeping track of found sets, replace cards when a set is found (but we'll need to keep track of which cards have already been selected) (and then handle getting to the end of the deck)
 - [ ] button to redeal if no valid sets are present - or even better, on each new deal check if any sets are present and automatically show a message and redeal

@@ -18,7 +18,6 @@
         const rows = 3;
         const cols = 4;
 
-        // TODO: make inside of unfilled shapes turn gray with the rest of the card
         // TODO: show sets found on the side somewhere?
         // TODO: instead of just keeping track of found sets, replace cards when a set is found
         //       (but we'll need to keep track of which cards have already been selected)
@@ -32,11 +31,15 @@
             .append("g")
             .attr("transform", `translate(${margins.left}, ${margins.top})`);
 
-        let currentCards = pickCards(rows*cols).map(obj => Object.assign(obj, {selected: false}));
+        let currentCards = pickCards(rows*cols).map((c) => ({
+            ...c,
+            selected: false,
+        }));
         let selected = [];
         let found = [];
 
         const getCardBackgroundId = (i) => `cardBackground_${i}`;
+        const getUnfilledShapesClass = (i) => `unfilledShape_${i}`;
 
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
@@ -59,19 +62,22 @@
                         .attr("ry", cardHeight / 15)
                         .attr("cx", cardWidth / 2)
                         .attr("cy", num => num * cardHeight / 10)
-                        .classed("cardShape", true);
-                } else if (card.shape == "diamond") {
+                        .classed("cardShape", true)
+                        .classed(getUnfilledShapesClass(cardIndex), card.fill === "none");
+                } else if (card.shape === "diamond") {
                     const diamondGenerator = d3.symbol().type(d3.symbolDiamond).size(600);
                     shapes.append("path")
                         .attr("d", diamondGenerator)
                         .attr("transform", num => `translate(${cardWidth/2}, ${num * cardHeight/10})`)
-                        .classed("cardShape", true);
+                        .classed("cardShape", true)
+                        .classed(getUnfilledShapesClass(cardIndex), card.fill === "none");
                 } else {
                     const starGenerator = d3.symbol().type(d3.symbolStar).size(400);
                     shapes.append("path")
                         .attr("d", starGenerator)
                         .attr("transform", num => `translate(${cardWidth/2}, ${num * cardHeight/10})`)
-                        .classed("cardShape", true);
+                        .classed("cardShape", true)
+                        .classed(getUnfilledShapesClass(cardIndex), card.fill === "none");
                 }
                 if (card.fill === "shaded") {
                     chart.append("defs")
@@ -104,6 +110,8 @@
 
                         chart.select(`#${getCardBackgroundId(cardIndex)}`)
                             .style("fill", () => currentCards[cardIndex].selected ? "lightgrey" : "none");
+                        chart.selectAll(`.${getUnfilledShapesClass(cardIndex)}`)
+                            .style("fill", () => currentCards[cardIndex].selected ? "lightgrey" : "none");
 
                         if (selected.length === 3) {
                             selected.sort();
@@ -120,6 +128,7 @@
                             }
                             selected.forEach((i) => {
                                 cardArea.select(`#${getCardBackgroundId(i)}`).style("fill", "white");
+                                cardArea.selectAll(`.${getUnfilledShapesClass(i)}`).style("fill", "white");
                             });
                             selected = [];
                             currentCards.forEach((c, i) => currentCards[i].selected = false);
