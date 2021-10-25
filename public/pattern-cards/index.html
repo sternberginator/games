@@ -119,19 +119,19 @@
                             if (found.indexOf(selected.join('_')) >= 0) {
                                 message = "this set has already been found";
                             } else {
-                                if (verifySet(...selected.map(i => currentCards[i]))) {
+                                if (verifySet(...selected.map(k => currentCards[k]))) {
                                     found.push(selected.join('_'));
                                     message = "set found";
                                 } else {
                                     message = "not a valid set";
                                 }
                             }
-                            selected.forEach((i) => {
-                                cardArea.select(`#${getCardBackgroundId(i)}`).style("fill", "white");
-                                cardArea.selectAll(`.${getUnfilledShapesClass(i)}`).style("fill", "white");
+                            selected.forEach((s) => {
+                                cardArea.select(`#${getCardBackgroundId(s)}`).style("fill", "white");
+                                cardArea.selectAll(`.${getUnfilledShapesClass(s)}`).style("fill", "white");
                             });
                             selected = [];
-                            currentCards.forEach((c, i) => currentCards[i].selected = false);
+                            currentCards.forEach((c, k) => currentCards[k].selected = false);
                             console.log(message);
                         }
                     });
